@@ -585,15 +585,28 @@ const Dashboard = () => {
       border: `2px solid ${isDarkMode ? '#1e293b' : '#ffffff'}`,
       marginLeft: '-8px',
     },
-    connectButton: {
-      padding: '8px 16px',
-      backgroundColor: isConnected ? '#22c55e' : isDarkMode ? '#1e293b' : '#ffffff',
-      color: isConnected ? '#ffffff' : (isDarkMode ? '#ffffff' : '#000000'),
-      border: isConnected ? 'none' : `1px solid ${isDarkMode ? '#2d3748' : '#e2e8f0'}`,
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-    },
+
+
+      connectButton: {
+        padding: '8px 16px',
+        backgroundColor: isConnected
+          ? (isDarkMode ? '#ffffff' : '#ffffff') // White background when connected
+          : (isDarkMode ? '#22c55e' : '#22c55e'), // Green background when not connected
+        color: isConnected
+          ? (isDarkMode ? '#22c55e' : '#22c55e') // Green text when connected
+          : '#ffffff', // White text when not connected
+        border: isConnected
+          ? `1px solid ${isDarkMode ? '#22c55e' : '#22c55e'}` // Green border when connected
+          : 'none', // No border when not connected
+        borderRadius: '8px',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        fontFamily: 'Inter, sans-serif',
+      },
+    
+
+
+    
     joinButton: {
       padding: '8px 16px',
       backgroundColor: '#000000',
