@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import Chart from 'chart.js/auto';
-import { MessageCircle, Search,  Home, FileText, Link, User,  } from 'lucide-react'
+import { MessageCircle, Settings,  Home, FileText, Link, User,  } from 'lucide-react'
 import CategoryText from './components/CategoryText';
 
 // LinearChart component: Renders a line chart using Chart.js
@@ -687,6 +687,7 @@ const Dashboard = () => {
             { icon: Link, label: 'Connect' },
             { icon: User, label: 'Profile' },
             { icon: MessageCircle , label: 'Chat' },
+            { icon: Settings , label: 'Settings' },
           ].map((item) => (
             <button
               key={item.label}
