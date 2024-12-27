@@ -1,7 +1,107 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
+import {MessageCircle, Plus, Search, Activity, Clock, CheckCircle, Info, Home, FileText, Link, User, Lock } from 'lucide-react'
+import Chart from 'chart.js/auto';
+import CategoryText from './components/CategoryText';
+
+const LinearChart = ({ data, color, label, isDarkMode }) => {
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  useEffect(() => {
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    const ctx = chartRef.current.getContext('2d');
+
+    chartInstance.current = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.map(d => d.name),
+        datasets: [{
+          label: label,
+          data: data.map(d => d.value),
+          borderColor: color,
+          backgroundColor: color + '20',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: color,
+          pointHoverBorderColor: 'white',
+          pointHoverBorderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            right: '5%'
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+            ticks: {
+              color: isDarkMode ? '#94a3b8' : '#64748b',
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: false,
+            },
+            ticks: {
+              color: isDarkMode ? '#94a3b8' : '#64748b',
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+            titleColor: isDarkMode ? '#ffffff' : '#000000',
+            bodyColor: isDarkMode ? '#94a3b8' : '#64748b',
+            borderColor: isDarkMode ? '#2d3748' : '#e2e8f0',
+            borderWidth: 1,
+            callbacks: {
+              label: function(context) {
+                return `${context.dataset.label}: ${context.parsed.y}`;
+              }
+            }
+          }
+        },
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false,
+        },
+        hover: {
+          mode: 'nearest',
+          intersect: false,
+        },
+      }
+    });
+
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [data, color, label, isDarkMode]);
+
+  return <canvas ref={chartRef} style={{ width: '50%', height: '200px' }} />;
+};
 
 const Dashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -11,28 +111,75 @@ const Dashboard = () => {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState("teams")
   const [viewMode, setViewMode] = useState('grid')
-  const [chartData, setChartData] = useState(null); // Add chartData state
-  const [activePopup, setActivePopup] = useState(null); // Add state for popup
+  const [chartData, setChartData] = useState({ chartData: [], categoryData: [] });
+  const [activePopup, setActivePopup] = useState(null);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const generateChartData = (tab) => {
-    // Implement your chart data generation logic here based on the active tab
-    if (tab === 'teams') {
-      return [
-        { name: 'Team A', value: 10 },
-        { name: 'Team B', value: 15 },
-        { name: 'Team C', value: 20 },
-      ];
-    }
-    // Add more cases for other tabs as needed
-    return [];
+    const baseData = [
+      { name: 'Jan', value: Math.floor(Math.random() * 100) },
+      { name: 'Feb', value: Math.floor(Math.random() * 100) },
+      { name: 'Mar', value: Math.floor(Math.random() * 100) },
+      { name: 'Apr', value: Math.floor(Math.random() * 100) },
+      { name: 'May', value: Math.floor(Math.random() * 100) },
+      { name: 'Jun', value: Math.floor(Math.random() * 100) },
+    ];
+
+    const categoryData = [
+      { name: 'Profiles', color: '#FF6384' },
+      { name: 'Projects', color: '#36A2EB' },
+      { name: 'Works', color: '#FFCE56' },
+      { name: 'Teams', color: '#4BC0C0' },
+      { name: 'Network', color: '#9966FF' },
+      { name: 'Activity', color: '#FF9F40' },
+    ];
+
+    const titles = {
+      profiles: 'Profile Statistics',
+      projects: 'Project Metrics',
+      works: 'Work Performance',
+      teams: 'Team Analytics',
+      network: 'Network Insights',
+      activity: 'Activity Summary',
+    };
+
+    return {
+      chartData: baseData.map(item => ({ 
+        ...item, 
+        value: item.value * (tab.toLowerCase() === 'teams' ? 0.6 : 1) 
+      })),
+      categoryData: categoryData.map(category => ({
+        ...category,
+        value: Math.floor(Math.random() * 100)
+      })),
+      title: titles[tab.toLowerCase()] || 'Statistics',
+    };
   };
 
+  const getChartColor = (tab) => {
+    switch (tab.toLowerCase()) {
+      case 'profiles':
+        return '#FF6384';
+      case 'projects':
+        return '#36A2EB';
+      case 'works':
+        return '#FFCE56';
+      case 'teams':
+        return '#4BC0C0';
+      case 'network':
+        return '#9966FF';
+      case 'activity':
+        return '#FF9F40';
+      default:
+        return '#FF6384';
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
     const date = new Date();
     setCurrentDate(date.toLocaleString('default', { month: 'long', year: 'numeric' }));
-    setChartData(generateChartData('Teams')); // Initialize with 'Teams' data
+    setChartData(generateChartData('Teams'));
   }, []);
 
   useEffect(() => {
@@ -195,7 +342,6 @@ const Dashboard = () => {
       padding: '24px',
       width: 'calc(100% - 260px)',
       borderRadius: '50px',
-      
     },
     header: {
       display: 'flex',
@@ -238,6 +384,8 @@ const Dashboard = () => {
       borderRadius: '12px',
       padding: '24px',
       marginBottom: '32px',
+      position: 'relative',
+      zIndex: 2,
     },
     profileHeader: {
       display: 'flex',
@@ -287,6 +435,8 @@ const Dashboard = () => {
     tabs: {
       display: 'flex',
       borderBottom: `1px solid ${isDarkMode ? '#2d3748' : '#e2e8f0'}`,
+      position: 'relative',
+      width: '100%',
     },
     tab: {
       padding: '12px 24px',
@@ -298,7 +448,7 @@ const Dashboard = () => {
     },
     activeTab: {
       color: isDarkMode ? '#ffffff' : '#000000',
-      borderBottomColor: '#3b82f6',
+      borderBottom: '2px solid #3b82f6',
     },
     sectionTitle: {
       fontSize: '20px',
@@ -465,18 +615,22 @@ const Dashboard = () => {
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
       zIndex: 1000,
     },
+    mainContent: {
+      marginTop: openDropdown ? '90px' : '0',
+      transition: 'margin-top 0.5s ease-in-out',
+    },
+    dropdownWrapper: {
+      position: 'relative',
+      marginBottom: openDropdown ? '100px' : '0',
+      transition: 'margin-bottom 0.5s ease-in-out',
+    },
+    chartContainer: {
+      backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+      borderRadius: '0 0 12px 12px',
+      padding: '16px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    },
   }
-
-  const TabPopup = ({ title, content, onClose }) => {
-    return (
-      <div>
-        <h3>{title}</h3>
-        <p>{content}</p>
-        <button onClick={onClose}>Close</button>
-      </div>
-    );
-  };
-
 
   if (!mounted) return null
 
@@ -502,26 +656,37 @@ const Dashboard = () => {
           + Add New
         </button>
 
-        <div style={styles.navSection}>
+        <nav style={styles.navSection}>
           <div style={styles.navLabel}>PAGES</div>
-          {['🏠 Home', '📄 Contract', '🔗 Connect', '👤 Public Profile', '🔒 Authentication'].map((item, index) => (
-            <button 
-              key={index}
-              style={styles.navButton}
+          {[
+            { icon: Home, label: 'Home' },
+            { icon: FileText, label: 'Contract' },
+            { icon: Link, label: 'Connect' },
+            { icon: User, label: 'Profile' },
+            { icon: MessageCircle , label: 'Chat' },
+          ].map((item) => (
+            <button
+              key={item.label}
+              style={{
+                ...styles.navButton,
+                backgroundColor: item.label === 'Home' ? '#3b82f6' : 'transparent',
+              }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#0f4ac5'
-                e.currentTarget.style.transform = 'translateY(-2px)'
+                if (item.label !== 'Home') {
+                  e.currentTarget.style.backgroundColor = '#2044b4'
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.transform = 'translateY(0)'
+                if (item.label !== 'Hom') {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }
               }}
-              onClick={() => setActivePopup(item.toLowerCase().replace(/\s/g, ''))}
             >
-              {item}
+              <item.icon size={20} />
+              {item.label}
             </button>
           ))}
-        </div>
+        </nav>
       </aside>
 
       <main style={styles.main}>
@@ -543,177 +708,190 @@ const Dashboard = () => {
           </div>
         </header>
 
-        <div style={styles.profileSection}>
-          <div style={styles.profileHeader}>
-            <div style={styles.profileInfo}>
-              <div 
-                style={{
-                  ...styles.avatar,
-                  ...(profileImage ? { backgroundImage: `url(${profileImage})` } : {}),
-                }}
-                onClick={handleProfileImageClick}
-              >
-                {!profileImage && 'TN'}
-              </div>
-              <div style={styles.profileDetails}>
-                <div style={styles.profileName}>
-                  Tarush Nigam
-                  <span style={styles.verifiedBadge}></span>
+        <div style={styles.dropdownWrapper}>
+          <div style={styles.profileSection}>
+            <div style={styles.profileHeader}>
+              <div style={styles.profileInfo}>
+                <div 
+                  style={{
+                    ...styles.avatar,
+                    ...(profileImage ? { backgroundImage: `url(${profileImage})` } : {}),
+                  }}
+                  onClick={handleProfileImageClick}
+                >
+                  {!profileImage && 'TN'}
                 </div>
-                <div style={styles.profileMeta}>
-                  <span>📍VJTI</span>
-                  <span>    🗃️Inheritance</span>
-                  <span>    📧ironman3000@avengers.com</span>
-                </div>
-              </div>
-            </div>
-            <button 
-              style={styles.connectButton}
-              onClick={() => setIsConnected(!isConnected)}
-            >
-              {isConnected ? 'Connected' : 'Connect'}
-            </button>
-          </div>
-
-          <div style={styles.tabs}>
-            {['Profiles', 'Projects', 'Works', 'Teams', 'Network', 'Activity'].map((tab) => (
-              <button
-                key={tab}
-                style={{
-                  ...styles.tab,
-                  ...(activeTab === tab.toLowerCase() ? styles.activeTab : {})
-                }}
-                onClick={() => {
-                  setActiveTab(tab.toLowerCase());
-                  setActivePopup(tab.toLowerCase());
-                }}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          {activePopup && (
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                style={styles.popup}
-              >
-                <TabPopup
-                  title={`${activePopup} Information`}
-                  content={`This is a brief overview of your ${activePopup}.`}
-                  onClose={() => setActivePopup(null)}
-                />
-              </motion.div>
-            </AnimatePresence>
-          )}
-        </div>
-
-        <h2 style={styles.sectionTitle}>Team Members ( Pixel Crafters )</h2>
-
-        <div style={styles.teamMembersGrid}>
-          {teamMembers.map((member, index) => (
-            <div 
-              key={index} 
-              style={styles.memberCard}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)'
-                e.currentTarget.style.boxShadow = isDarkMode 
-                  ? '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
-                  : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              <div style={styles.memberInitials}>{member.initials}</div>
-              <div style={styles.memberInfo}>
-                <div style={styles.memberName}>{member.name}</div>
-                <div style={styles.memberRole}>{member.role}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div style={styles.teamsHeader}>
-          <h2 style={styles.sectionTitle}>Teams</h2>
-          <div style={styles.headerActions}>
-            <button 
-              style={{
-                ...styles.button,
-                backgroundColor: viewMode === 'grid' ? (isDarkMode ? '#2d3748' : '#e2e8f0') : 'transparent'
-              }}
-              onClick={() => setViewMode('grid')}
-            >
-              ▦
-            </button>
-            <button 
-              style={{
-                ...styles.button,
-                backgroundColor: viewMode === 'list' ? (isDarkMode ? '#2d3748' : '#e2e8f0') : 'transparent'
-              }}
-              onClick={() => setViewMode('list')}
-            >
-              ☰
-            </button>
-          </div>
-        </div>
-
-        <div style={styles.teamsGrid}>
-          {teams.map((team) => (
-            <div 
-              key={team.id} 
-              style={styles.teamCard}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)'
-                e.currentTarget.style.boxShadow = isDarkMode 
-                  ? '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
-                  : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              <div style={styles.teamIcon}>👥</div>
-              <div style={styles.teamContent}>
-                <h3 style={styles.teamName}>{team.name}</h3>
-                <p style={styles.teamDescription}>{team.description}</p>
-                <div style={styles.skillsContainer}>
-                  {team.skills.map((skill) => (
-                    <span key={skill} style={styles.skillBadge}>{skill}</span>
-                  ))}
-                </div>
-                <div style={styles.starRating}>
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i}>{i < team.rating ? '★' : '☆'}</span>
-                  ))}
-                </div>
-                <div style={styles.teamFooter}>
-                  <div style={styles.memberAvatars}>
-                    {team.members.map((member, i) => (
-                      <div key={i} style={styles.memberAvatar}>{member}</div>
-                    ))}
+                <div style={styles.profileDetails}>
+                  <div style={styles.profileName}>
+                    Tarush Nigam
+                    <span style={styles.verifiedBadge}></span>
                   </div>
+                  <div style={styles.profileMeta}>
+                    <span>📍VJTI</span>
+                    <span>    🗃️Inheritance</span>
+                    <span>    📧ironman3000@avengers.com</span>
+                  </div>
+                </div>
+              </div>
+              <button 
+                style={styles.connectButton}
+                onClick={() => setIsConnected(!isConnected)}
+              >
+                {isConnected ? 'Connected' : 'Connect'}
+              </button>
+            </div>
+
+            <div style={styles.tabs}>
+              {['Profiles', 'Projects', 'Works', 'Teams', 'Network', 'Activity'].map((tab) => (
+                <div key={tab}>
                   <button
-                    style={team.joined ? styles.joinedButton : styles.joinButton}
-                    onClick={() => handleTeamJoin(team.id)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = '0.9'
+                    style={{
+                      ...styles.tab,
+                      ...(activeTab === tab.toLowerCase() ? styles.activeTab : {}),
+                      borderBottom: activeTab === tab.toLowerCase() ? '2px solid #3b82f6' : '2px solid transparent'
                     }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = '1'
+                    onClick={() => {
+                      setActiveTab(tab.toLowerCase());
+                      setOpenDropdown(openDropdown === tab.toLowerCase() ? null : tab.toLowerCase());
                     }}
                   >
-                    {team.joined ? 'Joined' : 'Join'}
+                    {tab}
                   </button>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+          <AnimatePresence>
+            {openDropdown && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+                style={styles.chartContainer}
+              >
+                <div className="relative">
+                  <LinearChart 
+                    data={chartData.chartData} 
+                    color={getChartColor(openDropdown)}
+                    label={openDropdown}
+                    isDarkMode={isDarkMode}
+                  />
+                  <CategoryText 
+                    categories={chartData.categoryData}
+                    isDarkMode={isDarkMode}
+                    title={chartData.title}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        <div style={styles.mainContent}>
+          <h2 style={styles.sectionTitle}>Team Members ( Pixel Crafters )</h2>
+
+          <div style={styles.teamMembersGrid}>
+            {teamMembers.map((member, index) => (
+              <div 
+                key={index} 
+                style={styles.memberCard}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.boxShadow = isDarkMode 
+                    ? '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
+                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                <div style={styles.memberInitials}>{member.initials}</div>
+                <div style={styles.memberInfo}>
+                  <div style={styles.memberName}>{member.name}</div>
+                  <div style={styles.memberRole}>{member.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={styles.teamsHeader}>
+            <h2 style={styles.sectionTitle}>Teams</h2>
+            <div style={styles.headerActions}>
+              <button 
+                style={{
+                  ...styles.button,
+                  backgroundColor: viewMode === 'grid' ? (isDarkMode ? '#2d3748' : '#e2e8f0') : 'transparent'
+                }}
+                onClick={() => setViewMode('grid')}
+              >
+                ▦
+              </button>
+              <button 
+                style={{
+                  ...styles.button,
+                  backgroundColor: viewMode === 'list' ? (isDarkMode ? '#2d3748' : '#e2e8f0') : 'transparent'
+                }}
+                onClick={() => setViewMode('list')}
+              >
+                ☰
+              </button>
+            </div>
+          </div>
+
+          <div style={styles.teamsGrid}>
+            {teams.map((team) => (
+              <div 
+                key={team.id} 
+                style={styles.teamCard}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.boxShadow = isDarkMode 
+                    ? '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
+                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                <div style={styles.teamIcon}>👥</div>
+                <div style={styles.teamContent}>
+                  <h3 style={styles.teamName}>{team.name}</h3>
+                  <p style={styles.teamDescription}>{team.description}</p>
+                  <div style={styles.skillsContainer}>
+                    {team.skills.map((skill) => (
+                      <span key={skill} style={styles.skillBadge}>{skill}</span>
+                    ))}
+                  </div>
+                  <div style={styles.starRating}>
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i}>{i < team.rating ? '★' : '☆'}</span>
+                    ))}
+                  </div>
+                  <div style={styles.teamFooter}>
+                    <div style={styles.memberAvatars}>
+                      {team.members.map((member, i) => (
+                        <div key={i} style={styles.memberAvatar}>{member}</div>
+                      ))}
+                    </div>
+                    <button
+                      style={team.joined ? styles.joinedButton : styles.joinButton}
+                      onClick={() => handleTeamJoin(team.id)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.9'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1'
+                      }}
+                    >
+                      {team.joined ? 'Joined' : 'Join'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     </div>
