@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { MessageCircle, Search,  Home, FileText, Link, User,  } from 'lucide-react'
+import { MessageCircle, Search, Settings, Home, FileText, Link, User,  } from 'lucide-react'
 import '@fontsource/inter'; // Importing Inter font
 
 export default function Dashboard() {
@@ -215,6 +215,7 @@ export default function Dashboard() {
             { icon: Link, label: 'Connect' },
             { icon: User, label: 'Profile' },
             { icon: MessageCircle , label: 'Chat' },
+            { icon: Settings , label: 'Settings' },
           ].map((item) => (
             <button
               key={item.label}
