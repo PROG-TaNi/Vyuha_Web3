@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
-import {MessageCircle, Plus, Search, Activity, Clock, CheckCircle, Info, Home, FileText, Link, User, Lock } from 'lucide-react'
 import Chart from 'chart.js/auto';
+import { MessageCircle, Search,  Home, FileText, Link, User,  } from 'lucide-react'
 import CategoryText from './components/CategoryText';
 
+// LinearChart component: Renders a line chart using Chart.js
 const LinearChart = ({ data, color, label, isDarkMode }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
@@ -22,7 +23,7 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
       data: {
         labels: data.map(d => d.name),
         datasets: [{
-          label: label,
+          label: 'Monthly Data',
           data: data.map(d => d.value),
           borderColor: color,
           backgroundColor: color + '20',
@@ -40,7 +41,7 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
         maintainAspectRatio: false,
         layout: {
           padding: {
-            right: '5%'
+            right: 20
           }
         },
         scales: {
@@ -50,6 +51,9 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
             },
             ticks: {
               color: isDarkMode ? '#94a3b8' : '#64748b',
+              font: {
+                size: 12
+              }
             }
           },
           y: {
@@ -59,6 +63,9 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
             },
             ticks: {
               color: isDarkMode ? '#94a3b8' : '#64748b',
+              font: {
+                size: 12
+              }
             }
           }
         },
@@ -76,7 +83,7 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
             borderWidth: 1,
             callbacks: {
               label: function(context) {
-                return `${context.dataset.label}: ${context.parsed.y}`;
+                return `Value: ${context.parsed.y}`;
               }
             }
           }
@@ -98,12 +105,14 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
         chartInstance.current.destroy();
       }
     };
-  }, [data, color, label, isDarkMode]);
+  }, [data, color, isDarkMode]);
 
-  return <canvas ref={chartRef} style={{ width: '50%', height: '200px' }} />;
+  return <canvas ref={chartRef} width={400} height={200} />;
 };
 
+// Dashboard component: Main component for the dashboard
 const Dashboard = () => {
+  // State variables
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [currentDate, setCurrentDate] = useState("")
   const [isConnected, setIsConnected] = useState(false)
@@ -112,50 +121,84 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("teams")
   const [viewMode, setViewMode] = useState('grid')
   const [chartData, setChartData] = useState({ chartData: [], categoryData: [] });
-  const [activePopup, setActivePopup] = useState(null);
+  // const [activePopup, setActivePopup] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [teams, setTeams] = useState([
+    {
+      id: 1,
+      name: 'Avengers',
+      description: 'Earth\'s Mightiest Heroes',
+      skills: ['Super Strength', 'Flight', 'Energy Projection'],
+      rating: 4,
+      members: ['IM', 'CA', 'T', 'BW', 'H'],
+      joined: false,
+    },
+    {
+      id: 2,
+      name: 'X-Men',
+      description: 'Mutants with extraordinary powers',
+      skills: ['Telepathy', 'Telekinesis', 'Healing'],
+      rating: 5,
+      members: ['P', 'J', 'S', 'W', 'M'],
+      joined: true,
+    },
+    {
+      id: 3,
+      name: 'Fantastic Four',
+      description: 'A team of scientists with superpowers',
+      skills: ['Stretching', 'Invisibility', 'Super Strength', 'Flame Control'],
+      rating: 3,
+      members: ['M', 'S', 'T', 'I'],
+      joined: false,
+    },
+  ]);
 
+  const teamMembers = [
+    { initials: "IM", name: "Iron Man", role: "Genius, Billionaire, Playboy, Philanthropist" },
+    { initials: "CA", name: "Captain America", role: "Super Soldier, Enhanced Strength & Agility" },
+    { initials: "T", name: "Thor", role: "God of Thunder, Control of Lightning, Immortality" },
+    { initials: "BW", name: "Black Widow", role: "Expert Martial Artist, Espionage, Enhanced Reflexes" },
+    { initials: "H", name: "Hawkeye", role: "Master Archer, Precision Shooting, Tactical Genius" },
+    { initials: "BP", name: "Black Panther", role: "Enhanced Strength, Speed, Vibranium Suit" },
+    { initials: "H", name: "Hulk", role: "Super Strength, Regeneration, Enhanced Durability" },
+    { initials: "SW", name: "Scarlet Witch", role: "Reality Warping, Telekinesis, Chaos Magic" },
+    { initials: "V", name: "Vision", role: "Superhuman Strength, Density Manipulation, Mind Stone Power" }
+  ];
+
+  // Function to generate chart data based on the selected tab
   const generateChartData = (tab) => {
     const baseData = [
-      { name: 'Jan', value: Math.floor(Math.random() * 100) },
-      { name: 'Feb', value: Math.floor(Math.random() * 100) },
-      { name: 'Mar', value: Math.floor(Math.random() * 100) },
-      { name: 'Apr', value: Math.floor(Math.random() * 100) },
-      { name: 'May', value: Math.floor(Math.random() * 100) },
-      { name: 'Jun', value: Math.floor(Math.random() * 100) },
+      { name: 'Jan', value: 0 },
+      { name: 'Feb', value: 0 },
+      { name: 'Mar', value: 0 },
+      { name: 'Apr', value: 0 },
+      { name: 'May', value: 0 },
+      { name: 'Jun', value: 0 },
     ];
 
     const categoryData = [
-      { name: 'Profiles', color: '#FF6384' },
-      { name: 'Projects', color: '#36A2EB' },
-      { name: 'Works', color: '#FFCE56' },
-      { name: 'Teams', color: '#4BC0C0' },
-      { name: 'Network', color: '#9966FF' },
-      { name: 'Activity', color: '#FF9F40' },
+      { name: 'Profiles', color: '#FF6384', value: 0 },
+      { name: 'Projects', color: '#36A2EB', value: 0 },
+      { name: 'Works', color: '#FFCE56', value: 0 },
+      { name: 'Teams', color: '#4BC0C0', value: 0 },
+      { name: 'Network', color: '#9966FF', value: 0 },
+      { name: 'Activity', color: '#FF9F40', value: 0 },
     ];
-
-    const titles = {
-      profiles: 'Profile Statistics',
-      projects: 'Project Metrics',
-      works: 'Work Performance',
-      teams: 'Team Analytics',
-      network: 'Network Insights',
-      activity: 'Activity Summary',
-    };
 
     return {
       chartData: baseData.map(item => ({ 
         ...item, 
-        value: item.value * (tab.toLowerCase() === 'teams' ? 0.6 : 1) 
+        value: Math.floor(Math.random() * 100)
       })),
       categoryData: categoryData.map(category => ({
         ...category,
         value: Math.floor(Math.random() * 100)
       })),
-      title: titles[tab.toLowerCase()] || 'Statistics',
+      title: 'Monthly Statistics',
     };
   };
 
+  // Function to get chart color based on the selected tab
   const getChartColor = (tab) => {
     switch (tab.toLowerCase()) {
       case 'profiles':
@@ -175,6 +218,7 @@ const Dashboard = () => {
     }
   };
 
+  // Effect hook to initialize component state
   useEffect(() => {
     setMounted(true);
     const date = new Date();
@@ -182,6 +226,7 @@ const Dashboard = () => {
     setChartData(generateChartData('Teams'));
   }, []);
 
+  // Effect hook to handle dark mode changes
   useEffect(() => {
     if (mounted) {
       document.documentElement.classList.toggle('dark', isDarkMode)
@@ -190,6 +235,7 @@ const Dashboard = () => {
     }
   }, [isDarkMode, mounted])
 
+  // Function to handle profile image upload
   const handleProfileImageClick = () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -209,53 +255,13 @@ const Dashboard = () => {
     input.click()
   }
 
-  const teamMembers = [
-    { initials: "IM", name: "Iron Man", role: "Genius, Billionaire, Playboy, Philanthropist" },
-    { initials: "CA", name: "Captain America", role: "Super Soldier, Enhanced Strength & Agility" },
-    { initials: "T", name: "Thor", role: "God of Thunder, Control of Lightning, Immortality" },
-    { initials: "BW", name: "Black Widow", role: "Expert Martial Artist, Espionage, Enhanced Reflexes" },
-    { initials: "H", name: "Hawkeye", role: "Master Archer, Precision Shooting, Tactical Genius" },
-    { initials: "BP", name: "Black Panther", role: "Enhanced Strength, Speed, Vibranium Suit" },
-    { initials: "H", name: "Hulk", role: "Super Strength, Regeneration, Enhanced Durability" },
-    { initials: "SW", name: "Scarlet Witch", role: "Reality Warping, Telekinesis, Chaos Magic" },
-    { initials: "V", name: "Vision", role: "Superhuman Strength, Density Manipulation, Mind Stone Power" }
-  ]
-
-  const [teams, setTeams] = useState([
-    {
-      id: 1,
-      name: "Pixel Crafters",
-      description: "Crafting digital experiences for the world",
-      skills: ["UI", "DevOps"],
-      rating: 5,
-      members: ["A", "B", "C"],
-      joined: true
-    },
-    {
-      id: 2,
-      name: "Code Masters", 
-      description: "Coding the future, one line at a time",
-      skills: ["Dev", "AI", "Cloud"],
-      rating: 5,
-      members: ["A", "B", "C"],
-      joined: true
-    },
-    {
-      id: 3,
-      name: "Market Mavericks",
-      description: "Navigating markets with strategic solutions", 
-      skills: ["Marketing", "Brand"],
-      rating: 4.5,
-      members: ["A", "B", "C", "D"],
-      joined: false
-    }
-  ])
-
+  // Function to handle joining/leaving a team
   const handleTeamJoin = (teamId) => {
     setTeams(teams.map(team => 
       team.id === teamId ? { ...team, joined: !team.joined } : team
     ))
   }
+
 
   const styles = {
     container: {
@@ -632,8 +638,10 @@ const Dashboard = () => {
     },
   }
 
+  // Render null if component is not mounted
   if (!mounted) return null
 
+  // Main component render
   return (
     <div style={styles.container}>
       <aside style={styles.sidebar}>
@@ -657,6 +665,8 @@ const Dashboard = () => {
         </button>
 
         <nav style={styles.navSection}>
+          <p style={styles.navLabel}></p>
+          <nav style={styles.navSection}>
           <div style={styles.navLabel}>PAGES</div>
           {[
             { icon: Home, label: 'Home' },
@@ -677,7 +687,7 @@ const Dashboard = () => {
                 }
               }}
               onMouseLeave={(e) => {
-                if (item.label !== 'Hom') {
+                if (item.label !== 'Home') {
                   e.currentTarget.style.backgroundColor = 'transparent'
                 }
               }}
@@ -686,6 +696,7 @@ const Dashboard = () => {
               {item.label}
             </button>
           ))}
+        </nav>
         </nav>
       </aside>
 
@@ -774,7 +785,6 @@ const Dashboard = () => {
                   <LinearChart 
                     data={chartData.chartData} 
                     color={getChartColor(openDropdown)}
-                    label={openDropdown}
                     isDarkMode={isDarkMode}
                   />
                   <CategoryText 
