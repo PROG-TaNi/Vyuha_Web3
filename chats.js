@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { Moon, Sun } from 'lucide-react'; // Importing icons for dark mode toggle
-import {  Home, FileText, Link, User,  MessageCircle} from 'lucide-react'
+import {  Home, FileText, Link, User, Settings, MessageCircle} from 'lucide-react'
 import '@fontsource/inter'; // Importing Inter font
 
 export default function MessageCenter() {
@@ -232,6 +232,7 @@ export default function MessageCenter() {
             { icon: Link, label: 'Connect' },
             { icon: User, label: 'Profile' },
             { icon:  MessageCircle, label: 'Chat' },
+            { icon: Settings , label: 'Settings' },
           ].map((item) => (
             <button
               key={item.label}
