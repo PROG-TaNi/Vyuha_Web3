@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Mail, MapPin, Phone, Star,MessageCircle, Plus, Search, Activity, Clock, CheckCircle, Info, Home, FileText, Link, User, Lock } from 'lucide-react'
+import { Mail, MapPin, Phone, Star,MessageCircle, Plus, Settings, Activity, Clock, CheckCircle, Info, Home, FileText, Link, User, Lock } from 'lucide-react'
 import Chart from 'chart.js/auto'
 
 export default function Dashboard() {
@@ -429,6 +429,7 @@ export default function Dashboard() {
             { icon: Link, label: 'Connect' },
             { icon: User, label: 'Profile' },
             { icon: MessageCircle , label: 'Chat' },
+            { icon: Settings , label: 'Settings' },
           ].map((item) => (
             <button
               key={item.label}
