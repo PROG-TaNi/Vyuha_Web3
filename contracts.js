@@ -1,76 +1,43 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { MessageCircle, Search, Settings, Home, FileText, Link, User, ChevronLeft, Moon, Sun } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useRef, useEffect } from 'react'
+import { Search, Moon, Sun, Home, FileText, Link, User, Settings, MessageCircle, Send, Bitcoin } from 'lucide-react'
 import '@fontsource/inter'
 
-export default function Dashboard() {
-  const [isDark, setIsDark] = useState(false)
+export default function MessageCenter() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedContract, setSelectedContract] = useState(null)
-  const [selectedCardBounds, setSelectedCardBounds] = useState(null)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [selectedPerson, setSelectedPerson] = useState(null)
+  const [isFading, setIsFading] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [inputMessage, setInputMessage] = useState('')
+  const chatAreaRef = useRef(null)
 
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }, [isDark])
-
-  // Sample contract data
-  const ongoingContract = {
-    id: '1',
-    title: 'Website Development Project',
-    description: 'Developing a responsive website with modern technologies.',
-    status: 'active',
-    dateStarted: '2024-01-01',
-    details: 'This contract involves the development of a responsive website using React and Next.js. The project includes multiple phases including design, development, testing, and deployment. Working with client ABC Corp to deliver a modern web experience.'
-  }
-
-  const pastContracts = [
-    {
-      id: '2',
-      title: 'Mobile App Development',
-      description: 'Created a cross-platform mobile application using React Native.',
-      status: 'completed',
-      dateStarted: '2023-06-01',
-      dateEnded: '2023-12-31',
-      details: 'Successfully delivered a cross-platform mobile application for iOS and Android. The project included user authentication, real-time data synchronization, and offline capabilities.'
-    },
-    {
-      id: '3',
-      title: 'UI/UX Design System',
-      description: 'Designed and implemented a comprehensive design system.',
-      status: 'completed',
-      dateStarted: '2023-03-01',
-      dateEnded: '2023-05-31',
-      details: 'Created a comprehensive design system including component library, documentation, and implementation guidelines. The system is now used across multiple projects.'
-    },
-    {
-      id: '4',
-      title: 'E-commerce Platform',
-      description: 'Built a scalable e-commerce platform with payment integration.',
-      status: 'completed',
-      dateStarted: '2023-01-01',
-      dateEnded: '2023-02-28',
-      details: 'Developed a full-featured e-commerce platform including product management, shopping cart, and secure payment processing integration.'
-    }
-  ]
+  const [people] = useState([
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob' },
+    { id: 3, name: 'Charlie' },
+    { id: 4, name: 'David' },
+    { id: 5, name: 'Eva' },
+    { id: 6, name: 'Frank' },
+    { id: 7, name: 'Grace' },
+    { id: 8, name: 'Hank' },
+    { id: 9, name: 'Ivy' },
+    { id: 10, name: 'Jack' },
+  ])
 
   const styles = {
     container: {
       minHeight: '100vh',
+      minWidth: '100vw',
       display: 'flex',
-      backgroundColor: isDark ? '#0f172a' : '#ffffff',
-      color: isDark ? '#ffffff' : '#000000',
+      backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+      color: isDarkMode ? '#ffffff' : '#000000',
       fontFamily: 'Inter, sans-serif',
-      transition: 'background-color 0.3s, color 0.3s',
     },
     sidebar: {
       width: '240px',
-      backgroundColor: isDark ? '#000000' : '#000000',
+      backgroundColor: '#000000',
       color: '#ffffff',
       padding: '24px',
       height: '100vh',
@@ -78,8 +45,6 @@ export default function Dashboard() {
       overflowY: 'auto',
       left: 0,
       top: 0,
-      fontFamily: 'Inter, sans-serif',
-      transition: 'background-color 0.3s',
     },
     sidebarLogo: {
       display: 'flex',
@@ -92,8 +57,8 @@ export default function Dashboard() {
     logoIcon: {
       width: '70px',
       height: '70px',
-      backgroundColor: isDark ? '#000000' : '#000000',
-      color: isDark ? '#ffffff' : '#ffffff',
+      backgroundColor: '#000000',
+      color: '#ffffff',
       borderRadius: '50%',
       display: 'flex',
       alignItems: 'center',
@@ -101,24 +66,17 @@ export default function Dashboard() {
       fontSize: '30px',
       fontWeight: 600,
       marginLeft: '20px',
-      transition: 'background-color 0.3s, color 0.3s',
     },
     addButton: {
       width: '100%',
-      padding: '14px',
+      padding: '12px',
       backgroundColor: '#343840',
       color: '#ffffff',
       border: 'none',
       borderRadius: '8px',
       cursor: 'pointer',
       marginBottom: '24px',
-      transition: 'background-color 0.2s, transform 0.2s',
-      fontSize: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-      fontFamily: 'Inter, sans-serif',
+      transition: 'background-color 0.2s',
     },
     navSection: {
       marginBottom: '24px',
@@ -129,7 +87,6 @@ export default function Dashboard() {
       marginBottom: '12px',
       fontWeight: 600,
       letterSpacing: '10px',
-      fontFamily: 'Inter, sans-serif',
     },
     navButton: {
       width: '100%',
@@ -144,32 +101,33 @@ export default function Dashboard() {
       alignItems: 'center',
       gap: '8px',
       marginBottom: '4px',
-      transition: 'background-color 0.2s, transform 0.2s',
+      transition: 'background-color 0.2s',
       height: '50px',
       fontSize: '16px',
-      fontFamily: 'Inter, sans-serif',
     },
     main: {
       flex: 1,
-      padding: '60px',
-      fontFamily: 'Inter, sans-serif',
+      padding: '55px',
+      marginLeft: '260px',
+      transition: 'opacity 0.3s ease-in-out',
     },
     searchContainer: {
       position: 'relative',
-      marginBottom: '32px',
+      marginBottom: '30px',
+      display: 'flex',
+      alignItems: 'center',
     },
     searchInput: {
-      width: '100%',
+      width: 'calc(100% - 40px)',
       padding: '12px 16px',
       paddingLeft: '40px',
       fontSize: '16px',
-      border: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
+      border: '1px solid #e2e8f0',
       borderRadius: '8px',
       backgroundColor: 'transparent',
-      color: isDark ? '#ffffff' : '#000000',
+      color: isDarkMode ? '#ffffff' : '#000000',
       outline: 'none',
       fontFamily: 'Inter, sans-serif',
-      transition: 'border-color 0.3s',
     },
     searchIcon: {
       position: 'absolute',
@@ -178,183 +136,201 @@ export default function Dashboard() {
       transform: 'translateY(-50%)',
       color: '#6b7280',
     },
+    toggleButton: {
+      marginLeft: '8px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      cursor: 'pointer',
+      color: isDarkMode ? '#ffffff' : '#000000',
+    },
     sectionTitle: {
       fontSize: '24px',
       fontWeight: 600,
       marginBottom: '20px',
-      color: isDark ? '#ffffff' : '#000000',
-      fontFamily: 'Inter, sans-serif',
     },
-    cardGrid: {
-      display: 'grid',
-      gap: '24px',
-      marginBottom: '32px',
-    },
-    ongoingGrid: {
-      gridTemplateColumns: '1fr',
-    },
-    pastGrid: {
-      gridTemplateColumns: 'repeat(3, 1fr)',
+    cardContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '16px',
     },
     card: {
-      padding: '24px',
+      padding: '16px',
       borderRadius: '12px',
-      backgroundColor: isDark ? '#1e293b' : '#ffffff',
-      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
-      transition: 'all 0.2s ease-in-out',
-      cursor: 'pointer',
-      fontFamily: 'Inter, sans-serif',
-      height: '200px',
-    },
-    cardTitle: {
-      fontSize: '18px',
-      fontWeight: 600,
-      marginBottom: '8px',
-      color: isDark ? '#ffffff' : '#000000',
-    },
-    cardDescription: {
-      color: isDark ? '#a0aec0' : '#6b7280',
-      fontSize: '14px',
-      lineHeight: 1.5,
-      fontFamily: 'Inter, sans-serif',
-    },
-    cardStatus: {
-      display: 'inline-block',
-      padding: '4px 12px',
-      borderRadius: '9999px',
-      fontSize: '12px',
-      fontWeight: 500,
-      marginBottom: '12px',
-    },
-    activeStatus: {
-      backgroundColor: '#dcfce7',
-      color: '#166534',
-    },
-    completedStatus: {
-      backgroundColor: '#e0e7ff',
-      color: '#3730a3',
-    },
-    detailView: {
-      padding: '32px',
-    },
-    selectedCard: {
-      maxWidth: '300px',
-      marginBottom: '24px',
-    },
-    backButton: {
+      backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb',
+      border: `1px solid ${isDarkMode ? '#2d3748' : '#e2e8f0'}`,
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
-      padding: '8px 16px',
-      backgroundColor: 'transparent',
-      border: 'none',
+      gap: '12px',
       cursor: 'pointer',
-      color: isDark ? '#ffffff' : '#000000',
-      marginBottom: '24px',
-      fontSize: '16px',
-      transition: 'transform 0.2s ease',
+      transition: 'transform 0.2s, box-shadow 0.2s',
     },
-    detailsCard: {
-      padding: '40px',
-      width: '300px',
+    cardAvatar: {
+      width: '50px',
+      height: '50px',
+      borderRadius: '50%',
+      backgroundColor: '#3b82f6',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#ffffff',
+      fontSize: '20px',
+      fontWeight: 600,
+    },
+    cardName: {
+      fontSize: '18px',
+      fontWeight: 600,
+    },
+    chatBox: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: 'calc(100vh - 110px)',
+      backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb',
       borderRadius: '12px',
-      backgroundColor: isDark ? '#1e293b' : '#ffffff',
-      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
-      width: '900px',
-      height:'200px', // Increased width to full width
-      transition: 'all 0.3s ease',
-      marginTop: '20px',
+      overflow: 'hidden',
     },
-    selectedCardInfo: {
-      width: '40%',
-    },
-    dateInfo: {
+    chatHeader: {
       display: 'flex',
-      gap: '24px',
-      marginBottom: '24px',
+      alignItems: 'center',
+      padding: '16px',
+      backgroundColor: '#3b82f6',
+      color: '#ffffff',
     },
-    dateLabel: {
-      fontSize: '14px',
-      color: isDark ? '#a0aec0' : '#6b7280',
+    chatAvatar: {
+      width: '40px',
+      height: '40px',
+      borderRadius: '50%',
+      backgroundColor: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#3b82f6',
+      fontSize: '18px',
+      fontWeight: 600,
+      marginRight: '12px',
     },
-    dateValue: {
+    chatName: {
+      fontSize: '18px',
+      fontWeight: 600,
+    },
+    closeButton: {
+      marginLeft: 'auto',
+      background: 'none',
+      border: 'none',
+      color: '#ffffff',
+      cursor: 'pointer',
       fontSize: '16px',
-      fontWeight: 500,
-      color: isDark ? '#ffffff' : '#000000',
     },
-    selectedCardHeader: {
+    chatArea: {
+      flex: 1,
+      padding: '16px',
+      overflowY: 'auto',
+    },
+    message: {
+      maxWidth: 'calc(100% - 40px)',
+      padding: '8px 12px',
+      borderRadius: '12px',
+      marginBottom: '8px',
+      wordWrap: 'break-word',
+    },
+    sentMessage: {
+      backgroundColor: '#8b5cf6',
+      color: '#ffffff',
+      alignSelf: 'flex-end',
+      marginLeft: '40px',
+    },
+    receivedMessage: {
+      backgroundColor: isDarkMode ? '#374151' : '#e5e7eb',
+      color: isDarkMode ? '#ffffff' : '#000000',
+      alignSelf: 'flex-start',
+    },
+    inputArea: {
       display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: '24px',
-      gap: '24px',
-      width: '100%',
-      maxWidth: '100%',
+      alignItems: 'center',
+      padding: '16px',
+      borderTop: '1px solid #e2e8f0',
     },
-    dateGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px',
-      alignItems: 'flex-end',
-      position: 'absolute',
-      right: '24px',
-      top: '24px',
+    input: {
+      flex: 1,
+      padding: '8px 12px',
+      fontSize: '16px',
+      border: '1px solid #e2e8f0',
+      borderRadius: '20px',
+      marginRight: '8px',
+      backgroundColor: isDarkMode ? '#2d3748' : '#ffffff',
+      color: isDarkMode ? '#ffffff' : '#000000',
     },
-    dateBox: {
-      padding: '8px 16px',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: 500,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-end',
-    },
-    startDate: {
-      backgroundColor: '#dcfce7',
-      color: '#166534',
-    },
-    endDate: {
-      backgroundColor: '#e0e7ff',
-      color: '#3730a3',
-    },
-    darkModeToggle: {
-      position: 'absolute',
-      top: '20px',
-      right: '20px',
+    iconButton: {
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: isDark ? '#ffffff' : '#000000',
-      fontSize: '24px',
+      padding: '8px',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: '4px',
+    },
+    sendButton: {
+      backgroundColor: '#10B981',
+    },
+    bitcoinButton: {
+      backgroundColor: '#8B5CF6',
     },
   }
 
-  const handleCardClick = (contract, event) => {
-    const mainElement = document.querySelector('main');
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const mainBounds = mainElement?.getBoundingClientRect();
+  const handlePersonClick = (person) => {
+    setIsFading(true)
+    setTimeout(() => {
+      setSelectedPerson(person)
+      setIsFading(false)
+    }, 300)
+  }
+
+  const handleCloseChat = () => {
+    setIsFading(true)
+    setTimeout(() => {
+      setSelectedPerson(null)
+      setMessages([])
+      setIsFading(false)
+    }, 300)
+  }
+
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
+      setMessages([...messages, { text: inputMessage, sent: true }])
+      setInputMessage('')
     
-    if (mainBounds) {
-      setSelectedCardBounds({
-        left: bounds.left - mainBounds.left,
-        top: bounds.top - mainBounds.top,
-        width: bounds.width,
-        height: bounds.height,
-      });
+      // Simulate a received message after a short delay
+      setTimeout(() => {
+        setMessages(prevMessages => [...prevMessages, { text: 'This is a reply', sent: false }])
+      }, 1000)
     }
-    
-    setSelectedContract(contract);
   }
 
-  const filterContracts = (contracts, query) => {
-    return contracts.filter(contract => 
-      contract.title.toLowerCase().includes(query.toLowerCase()) ||
-      contract.description.toLowerCase().includes(query.toLowerCase())
-    );
+  const handleBitcoinClick = () => {
+    // Placeholder for Bitcoin-related functionality
+    console.log('Bitcoin button clicked')
   }
 
-  if (selectedContract) {
-    return (
+  useEffect(() => {
+    if (chatAreaRef.current) {
+      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight
+    }
+  }, [messages])
+
+  return (
+    <>
+      <style>
+        {`
+          html, body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            height: 100%;
+            width: 100%;
+          }
+        `}
+      </style>
       <div style={styles.container}>
         <aside style={styles.sidebar}>
           <div style={styles.sidebarLogo}>
@@ -373,169 +349,9 @@ export default function Dashboard() {
               e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 12h14M12 5v14" />
-            </svg>
-            Add New
+            + Add New
           </button>
 
-          <nav style={styles.navSection}>
-            <p style={styles.navLabel}></p>
-            <nav style={styles.navSection}>
-              <div style={styles.navLabel}>PAGES</div>
-              {[
-                { icon: Home, label: 'Home' },
-                { icon: FileText, label: 'Contract' },
-                { icon: Link, label: 'Connect' },
-                { icon: User, label: 'Profile' },
-                { icon: MessageCircle , label: 'Chat' },
-                { icon: Settings , label: 'Settings' },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  style={{
-                    ...styles.navButton,
-                    backgroundColor: item.label === 'Contract' ? '#3b82f6' : 'transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (item.label !== 'Contract') {
-                      e.currentTarget.style.backgroundColor = '#2044b4'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (item.label !== 'Contract') {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
-                  }}
-                >
-                  <item.icon size={20} />
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-          </nav>
-        </aside>
-
-        <main style={{...styles.main, marginLeft: '240px'}}>
-          <button
-            style={styles.darkModeToggle}
-            onClick={() => setIsDark(!isDark)}
-          >
-            {isDark ? <Sun /> : <Moon />}
-          </button>
-          <motion.button 
-            style={styles.backButton}
-            onClick={() => setSelectedContract(null)}
-            whileHover={{ x: -5 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <ChevronLeft size={24} />
-          </motion.button>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key="selected-contract"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div 
-                initial={{ 
-                  position: 'absolute',
-                  left: selectedCardBounds?.left,
-                  top: selectedCardBounds?.top,
-                  width: selectedCardBounds?.width,
-                  height: selectedCardBounds?.height,
-                  opacity: 1,
-                  zIndex: 10,
-                }}
-                animate={{
-                  position: 'relative',
-                  left: 0,
-                  top: 0,
-                  width: '40%',
-                  height: 'auto',
-                  opacity: 1,
-                }}
-                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-              >
-                <div style={{...styles.card, cursor: 'default'}}>
-                  <div style={styles.selectedCardHeader}>
-                    <div style={styles.selectedCardInfo}>
-                      <span style={{
-                        ...styles.cardStatus,
-                        ...(selectedContract.status === 'active' ? styles.activeStatus : styles.completedStatus)
-                      }}>
-                        {selectedContract.status === 'active' ? 'Active' : 'Completed'}
-                      </span>
-                      <h3 style={styles.cardTitle}>{selectedContract.title}</h3>
-                      <p style={styles.cardDescription}>{selectedContract.description}</p>
-                    </div>
-                    <div style={styles.dateGroup}>
-                      <div style={{...styles.dateBox, ...styles.startDate}}>
-                        <span style={{ fontSize: '12px', opacity: 0.8 }}>Started</span>
-                        <span>{selectedContract.dateStarted}</span>
-                      </div>
-                      {selectedContract.dateEnded && (
-                        <div style={{...styles.dateBox, ...styles.endDate}}>
-                          <span style={{ fontSize: '12px', opacity: 0.8 }}>Ended</span>
-                          <span>{selectedContract.dateEnded}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.4 }}
-                  style={styles.detailsCard}
-                  whileHover={{
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-                    transform: 'translateY(-5px)',
-                  }}
-                >
-                  <h2 style={{...styles.sectionTitle, marginBottom: '16px'}}>Contract Details</h2>
-                  <p style={{...styles.cardDescription, fontSize: '16px', lineHeight: '1.6'}}>
-                    {selectedContract.details}
-                  </p>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-        </main>
-      </div>
-    )
-  }
-
-  return (
-    <div style={styles.container}>
-      <aside style={styles.sidebar}>
-        <div style={styles.sidebarLogo}>
-          <div style={styles.logoIcon}>V</div>
-          <span>Vyuha</span>
-        </div>
-
-        <button 
-          style={styles.addButton}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2044b4'
-            e.currentTarget.style.transform = 'translateY(-2px)'
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#343840'
-            e.currentTarget.style.transform = 'translateY(0)'
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12h14M12 5v14" />
-          </svg>
-          Add New
-        </button>
-
-        <nav style={styles.navSection}>
-          <p style={styles.navLabel}></p>
           <nav style={styles.navSection}>
             <div style={styles.navLabel}>PAGES</div>
             {[
@@ -543,22 +359,22 @@ export default function Dashboard() {
               { icon: FileText, label: 'Contract' },
               { icon: Link, label: 'Connect' },
               { icon: User, label: 'Profile' },
-              { icon: MessageCircle , label: 'Chat' },
-              { icon: Settings , label: 'Settings' },
+              { icon: MessageCircle, label: 'Chat' },
+              { icon: Settings, label: 'Settings' },
             ].map((item) => (
               <button
                 key={item.label}
                 style={{
                   ...styles.navButton,
-                  backgroundColor: item.label === 'Contract' ? '#3b82f6' : 'transparent',
+                  backgroundColor: item.label === 'Chat' ? '#3b82f6' : 'transparent',
                 }}
                 onMouseEnter={(e) => {
-                  if (item.label !== 'Contract') {
+                  if (item.label !== 'Chat') {
                     e.currentTarget.style.backgroundColor = '#2044b4'
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (item.label !== 'Contract') {
+                  if (item.label !== 'Chat') {
                     e.currentTarget.style.backgroundColor = 'transparent'
                   }
                 }}
@@ -568,83 +384,103 @@ export default function Dashboard() {
               </button>
             ))}
           </nav>
-        </nav>
-      </aside>
+        </aside>
 
-      <main style={{...styles.main, marginLeft: '240px'}}>
-        <button
-          style={styles.darkModeToggle}
-          onClick={() => setIsDark(!isDark)}
-        >
-          {isDark ? <Sun /> : <Moon />}
-        </button>
-        <div style={styles.searchContainer}>
-          <Search size={20} style={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search contracts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={styles.searchInput}
-          />
-        </div>
-
-        <AnimatePresence>
-          <motion.div
-            key="contract-list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <section>
-              <h2 style={styles.sectionTitle}>ON GOING CONTRACT</h2>
-              <motion.div 
-                style={{...styles.cardGrid, ...styles.ongoingGrid}}
-                layout
-              >
-                {filterContracts([ongoingContract], searchQuery).map((contract) => (
-                  <motion.div 
-                    key={contract.id}
-                    style={styles.card}
-                    onClick={(e) => handleCardClick(contract, e)}
-                    whileHover={{ y: -4, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
-                    transition={{ duration: 0.2 }} // Faster hover effect
-                    layout
+        <main style={{...styles.main, opacity: isFading ? 0 : 1}}>
+          {selectedPerson ? (
+            <div style={styles.chatBox}>
+              <div style={styles.chatHeader}>
+                <div style={styles.chatAvatar}>{selectedPerson.name.charAt(0)}</div>
+                <div style={styles.chatName}>{selectedPerson.name}</div>
+                <button style={styles.closeButton} onClick={handleCloseChat}>
+                  ×
+                </button>
+              </div>
+              <div style={styles.chatArea} ref={chatAreaRef}>
+                {messages.map((message, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.message,
+                      ...(message.sent ? styles.sentMessage : styles.receivedMessage),
+                    }}
                   >
-                    <span style={{...styles.cardStatus, ...styles.activeStatus}}>Active</span>
-                    <h3 style={styles.cardTitle}>{contract.title}</h3>
-                    <p style={styles.cardDescription}>{contract.description}</p>
-                  </motion.div>
+                    {message.text}
+                  </div>
                 ))}
-              </motion.div>
-            </section>
+              </div>
+              <div style={styles.inputArea}>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Type a message..."
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSendMessage()
+                    }
+                  }}
+                />
+                <button 
+                  style={{...styles.iconButton, ...styles.sendButton}} 
+                  onClick={handleSendMessage}
+                >
+                  <Send size={20} color="#ffffff" />
+                </button>
+                <button 
+                  style={{...styles.iconButton, ...styles.bitcoinButton}} 
+                  onClick={handleBitcoinClick}
+                >
+                  <Bitcoin size={20} color="#ffffff" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div style={styles.searchContainer}>
+                <Search size={20} style={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search people..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={styles.searchInput}
+                />
+                <button 
+                  style={styles.toggleButton}
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                >
+                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+              </div>
 
-            <section>
-              <h2 style={styles.sectionTitle}>PAST CONTRACTS</h2>
-              <motion.div 
-                style={{...styles.cardGrid, ...styles.pastGrid}}
-                layout
-              >
-                {filterContracts(pastContracts, searchQuery).map((contract) => (
-                  <motion.div 
-                    key={contract.id}
+              <h2 style={styles.sectionTitle}>Message Center</h2>
+              <div style={styles.cardContainer}>
+                {people.filter(person => person.name.toLowerCase().includes(searchQuery.toLowerCase())).map(person => (
+                  <div
+                    key={person.id}
                     style={styles.card}
-                    onClick={(e) => handleCardClick(contract, e)}
-                    whileHover={{ y: -4, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
-                    transition={{ duration: 0.2 }} // Faster hover effect
-                    layout
+                    onClick={() => handlePersonClick(person)}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.02)'
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)'
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)'
+                      e.currentTarget.style.boxShadow = 'none'
+                    }}
                   >
-                    <span style={{...styles.cardStatus, ...styles.completedStatus}}>Completed</span>
-                    <h3 style={styles.cardTitle}>{contract.title}</h3>
-                    <p style={styles.cardDescription}>{contract.description}</p>
-                  </motion.div>
+                    <div style={styles.cardAvatar}>{person.name.charAt(0)}</div>
+                    <div style={styles.cardName}>{person.name}</div>
+                  </div>
                 ))}
-              </motion.div>
-            </section>
-          </motion.div>
-        </AnimatePresence>
-      </main>
-    </div>
+              </div>
+            </>
+          )}
+        </main>
+      </div>
+    </>
   )
 }
 
