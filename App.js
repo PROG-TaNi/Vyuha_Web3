@@ -1,13 +1,10 @@
-'use client'
-
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Chart from 'chart.js/auto';
-import { MessageCircle, Settings,  Home, FileText, Link, User,  } from 'lucide-react'
-import CategoryText from './components/CategoryText';
+import { MessageCircle, Settings, Home, FileText, Link, User } from 'lucide-react';
 
 // LinearChart component: Renders a line chart using Chart.js
-const LinearChart = ({ data, color, label, isDarkMode }) => {
+const LinearChart = ({ data, color, isDarkMode }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
@@ -82,7 +79,7 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
             borderColor: isDarkMode ? '#2d3748' : '#e2e8f0',
             borderWidth: 1,
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 return `Value: ${context.parsed.y}`;
               }
             }
@@ -113,15 +110,14 @@ const LinearChart = ({ data, color, label, isDarkMode }) => {
 // Dashboard component: Main component for the dashboard
 const Dashboard = () => {
   // State variables
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [currentDate, setCurrentDate] = useState("")
-  const [isConnected, setIsConnected] = useState(false)
-  const [profileImage, setProfileImage] = useState(null)
-  const [mounted, setMounted] = useState(false)
-  const [activeTab, setActiveTab] = useState("teams")
-  const [viewMode, setViewMode] = useState('grid')
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentDate, setCurrentDate] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState("teams");
+  const [viewMode, setViewMode] = useState('grid');
   const [chartData, setChartData] = useState({ chartData: [], categoryData: [] });
-  // const [activePopup, setActivePopup] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [teams, setTeams] = useState([
     {
@@ -166,7 +162,7 @@ const Dashboard = () => {
   ];
 
   // Function to generate chart data based on the selected tab
-  const generateChartData = (tab) => {
+  const generateChartData = () => {
     const baseData = [
       { name: 'Jan', value: 0 },
       { name: 'Feb', value: 0 },
@@ -199,8 +195,8 @@ const Dashboard = () => {
   };
 
   // Function to get chart color based on the selected tab
-  const getChartColor = (tab) => {
-    switch (tab.toLowerCase()) {
+  const getChartColor = () => {
+    switch (activeTab.toLowerCase()) {
       case 'profiles':
         return '#FF6384';
       case 'projects':
@@ -223,46 +219,46 @@ const Dashboard = () => {
     setMounted(true);
     const date = new Date();
     setCurrentDate(date.toLocaleString('default', { month: 'long', year: 'numeric' }));
-    setChartData(generateChartData('Teams'));
+    setChartData(generateChartData());
   }, []);
 
   // Effect hook to handle dark mode changes
   useEffect(() => {
     if (mounted) {
-      document.documentElement.classList.toggle('dark', isDarkMode)
-      document.body.style.backgroundColor = isDarkMode ? '#1a1a1a' : '#ffffff'
-      document.body.style.color = isDarkMode ? '#ffffff' : '#000000'
+      document.documentElement.classList.toggle('dark', isDarkMode);
+      document.body.style.backgroundColor = isDarkMode ? '#1a1a1a' : '#ffffff';
+      document.body.style.color = isDarkMode ? '#ffffff' : '#000000';
     }
-  }, [isDarkMode, mounted])
+  }, [isDarkMode, mounted]);
 
   // Function to handle profile image upload
   const handleProfileImageClick = () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/*'
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
     input.onchange = (e) => {
-      const file = e.target.files?.[0]
+      const file = e.target.files?.[0];
       if (file) {
-        const reader = new FileReader()
+        const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target?.result) {
-            setProfileImage(e.target.result)
+            setProfileImage(e.target.result);
           }
-        }
-        reader.readAsDataURL(file)
+        };
+        reader.readAsDataURL(file);
       }
-    }
-    input.click()
-  }
+    };
+    input.click();
+  };
 
   // Function to handle joining/leaving a team
   const handleTeamJoin = (teamId) => {
     setTeams(teams.map(team => 
       team.id === teamId ? { ...team, joined: !team.joined } : team
-    ))
-  }
+    ));
+  };
 
-
+  // Styles
   const styles = {
     container: {
       display: 'flex',
@@ -343,7 +339,7 @@ const Dashboard = () => {
     },
     main: {
       marginLeft: '280px',
-      marginTop:'0.1px',
+      marginTop: '0.1px',
       flex: 1,
       padding: '24px',
       width: 'calc(100% - 260px)',
@@ -585,28 +581,22 @@ const Dashboard = () => {
       border: `2px solid ${isDarkMode ? '#1e293b' : '#ffffff'}`,
       marginLeft: '-8px',
     },
-
-
-      connectButton: {
-        padding: '8px 16px',
-        backgroundColor: isConnected
-          ? (isDarkMode ? '#ffffff' : '#ffffff') // White background when connected
-          : (isDarkMode ? '#22c55e' : '#22c55e'), // Green background when not connected
-        color: isConnected
-          ? (isDarkMode ? '#22c55e' : '#22c55e') // Green text when connected
-          : '#ffffff', // White text when not connected
-        border: isConnected
-          ? `1px solid ${isDarkMode ? '#22c55e' : '#22c55e'}` // Green border when connected
-          : 'none', // No border when not connected
-        borderRadius: '8px',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        fontFamily: 'Inter, sans-serif',
-      },
-    
-
-
-    
+    connectButton: {
+      padding: '8px 16px',
+      backgroundColor: isConnected
+        ? (isDarkMode ? '#ffffff' : '#ffffff') // White background when connected
+        : (isDarkMode ? '#22c55e' : '#22c55e'), // Green background when not connected
+      color: isConnected
+        ? (isDarkMode ? '#22c55e' : '#22c55e') // Green text when connected
+        : '#ffffff', // White text when not connected
+      border: isConnected
+        ? `1px solid ${isDarkMode ? '#22c55e' : '#22c55e'}` // Green border when connected
+        : 'none', // No border when not connected
+      borderRadius: '8px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      fontFamily: 'Inter, sans-serif',
+    },
     joinButton: {
       padding: '8px 16px',
       backgroundColor: '#000000',
@@ -649,10 +639,10 @@ const Dashboard = () => {
       padding: '16px',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
     },
-  }
+  };
 
   // Render null if component is not mounted
-  if (!mounted) return null
+  if (!mounted) return null;
 
   // Main component render
   return (
@@ -660,34 +650,36 @@ const Dashboard = () => {
       <aside style={styles.sidebar}>
         <div style={styles.sidebarLogo}>
           <div style={styles.logoIcon}>V</div>
-          <span>Vyuha</span>
+          <span style={{
+            background: 'linear-gradient(90deg, #FF6384, #36A2EB)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>Vyuha</span>
         </div>
 
         <button 
           style={styles.addButton}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#1e40af'
-            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.backgroundColor = '#1e40af';
+            e.currentTarget.style.transform = 'translateY(-2px)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#343840'
-            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.backgroundColor = '#343840';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           + Add New
         </button>
 
         <nav style={styles.navSection}>
-          <p style={styles.navLabel}></p>
-          <nav style={styles.navSection}>
           <div style={styles.navLabel}>PAGES</div>
           {[
             { icon: Home, label: 'Home' },
             { icon: FileText, label: 'Contract' },
             { icon: Link, label: 'Connect' },
             { icon: User, label: 'Profile' },
-            { icon: MessageCircle , label: 'Chat' },
-            { icon: Settings , label: 'Settings' },
+            { icon: MessageCircle, label: 'Chat' },
+            { icon: Settings, label: 'Settings' },
           ].map((item) => (
             <button
               key={item.label}
@@ -697,12 +689,12 @@ const Dashboard = () => {
               }}
               onMouseEnter={(e) => {
                 if (item.label !== 'Home') {
-                  e.currentTarget.style.backgroundColor = '#2044b4'
+                  e.currentTarget.style.backgroundColor = '#2044b4';
                 }
               }}
               onMouseLeave={(e) => {
                 if (item.label !== 'Home') {
-                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.backgroundColor = 'transparent';
                 }
               }}
             >
@@ -710,7 +702,6 @@ const Dashboard = () => {
               {item.label}
             </button>
           ))}
-        </nav>
         </nav>
       </aside>
 
@@ -726,7 +717,7 @@ const Dashboard = () => {
           </div>
           <div style={styles.headerActions}>
             <button style={styles.button}>📤 Export</button>
-            <button style={styles.button}>{currentDate} </button>
+            <button style={styles.button}>{currentDate}</button>
             <button style={styles.button} onClick={() => setIsDarkMode(!isDarkMode)}>
               {isDarkMode ? '☀️' : '🌙'}
             </button>
@@ -753,8 +744,8 @@ const Dashboard = () => {
                   </div>
                   <div style={styles.profileMeta}>
                     <span>📍VJTI</span>
-                    <span>    🗃️Inheritance</span>
-                    <span>    📧ironman3000@avengers.com</span>
+                    <span> 🗃️Inheritance</span>
+                    <span> 📧ironman3000@avengers.com</span>
                   </div>
                 </div>
               </div>
@@ -801,11 +792,12 @@ const Dashboard = () => {
                     color={getChartColor(openDropdown)}
                     isDarkMode={isDarkMode}
                   />
-                  <CategoryText 
+                  {/* Assuming CategoryText is a custom component you can create or replace */}
+                  {/* <CategoryText 
                     categories={chartData.categoryData}
                     isDarkMode={isDarkMode}
                     title={chartData.title}
-                  />
+                  /> */}
                 </div>
               </motion.div>
             )}
@@ -820,14 +812,14 @@ const Dashboard = () => {
                 key={index} 
                 style={styles.memberCard}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.transform = 'translateY(-4px)';
                   e.currentTarget.style.boxShadow = isDarkMode 
                     ? '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
-                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'none'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 <div style={styles.memberInitials}>{member.initials}</div>
@@ -869,14 +861,14 @@ const Dashboard = () => {
                 key={team.id} 
                 style={styles.teamCard}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.transform = 'translateY(-4px)';
                   e.currentTarget.style.boxShadow = isDarkMode 
                     ? '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
-                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'none'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 <div style={styles.teamIcon}>👥</div>
@@ -903,10 +895,10 @@ const Dashboard = () => {
                       style={team.joined ? styles.joinedButton : styles.joinButton}
                       onClick={() => handleTeamJoin(team.id)}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '0.9'
+                        e.currentTarget.style.opacity = '0.9';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '1'
+                        e.currentTarget.style.opacity = '1';
                       }}
                     >
                       {team.joined ? 'Joined' : 'Join'}
@@ -919,8 +911,7 @@ const Dashboard = () => {
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
-
+export default Dashboard;
