@@ -1,486 +1,245 @@
-'use client'
+import React, { useState, useEffect, useRef } from "react";
+import { Search, Settings, Mail, Moon, Sun, Send, Bitcoin } from 'lucide-react';
+import io from 'socket.io-client';
+import './App.css'; // Make sure to import your CSS here
+import ParticlesCanvas from './particle'; // Adjust the path as necessary
 
-import React, { useState, useRef, useEffect } from 'react'
-import { Search, Moon, Sun, Home, FileText, Link, User, Settings, MessageCircle, Send, Bitcoin } from 'lucide-react'
-import '@fontsource/inter'
-
-export default function MessageCenter() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [selectedPerson, setSelectedPerson] = useState(null)
-  const [isFading, setIsFading] = useState(false)
-  const [messages, setMessages] = useState([])
-  const [inputMessage, setInputMessage] = useState('')
-  const chatAreaRef = useRef(null)
-
-  const [people] = useState([
-    { id: 1, name: 'Alice' },
-    { id: 2, name: 'Bob' },
-    { id: 3, name: 'Charlie' },
-    { id: 4, name: 'David' },
-    { id: 5, name: 'Eva' },
-    { id: 6, name: 'Frank' },
-    { id: 7, name: 'Grace' },
-    { id: 8, name: 'Hank' },
-    { id: 9, name: 'Ivy' },
-    { id: 10, name: 'Jack' },
-  ])
-
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      minWidth: '100vw',
-      display: 'flex',
-      backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
-      color: isDarkMode ? '#ffffff' : '#000000',
-      fontFamily: 'Inter, sans-serif',
-    },
-    sidebar: {
-      width: '240px',
-      backgroundColor: '#000000',
-      color: '#ffffff',
-      padding: '24px',
-      height: '100vh',
-      position: 'fixed',
-      overflowY: 'auto',
-      left: 0,
-      top: 0,
-    },
-    sidebarLogo: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '20px',
-      marginBottom: '24px',
-      fontSize: '30px',
-      fontWeight: 600,
-    },
-    logoIcon: {
-      width: '70px',
-      height: '70px',
-      backgroundColor: '#000000',
-      color: '#ffffff',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '30px',
-      fontWeight: 600,
-      marginLeft: '20px',
-    },
-    addButton: {
-      width: '100%',
-      padding: '12px',
-      backgroundColor: '#343840',
-      color: '#ffffff',
-      border: 'none',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      marginBottom: '24px',
-      transition: 'background-color 0.2s',
-    },
-    navSection: {
-      marginBottom: '24px',
-    },
-    navLabel: {
-      fontSize: '12px',
-      color: '#6b7280',
-      marginBottom: '12px',
-      fontWeight: 600,
-      letterSpacing: '10px',
-    },
-    navButton: {
-      width: '100%',
-      padding: '10px 12px',
-      backgroundColor: 'transparent',
-      color: '#ffffff',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      textAlign: 'left',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      marginBottom: '4px',
-      transition: 'background-color 0.2s',
-      height: '50px',
-      fontSize: '16px',
-    },
-    main: {
-      flex: 1,
-      padding: '55px',
-      marginLeft: '260px',
-      transition: 'opacity 0.3s ease-in-out',
-    },
-    searchContainer: {
-      position: 'relative',
-      marginBottom: '30px',
-      display: 'flex',
-      alignItems: 'center',
-    },
-    searchInput: {
-      width: 'calc(100% - 40px)',
-      padding: '12px 16px',
-      paddingLeft: '40px',
-      fontSize: '16px',
-      border: '1px solid #e2e8f0',
-      borderRadius: '8px',
-      backgroundColor: 'transparent',
-      color: isDarkMode ? '#ffffff' : '#000000',
-      outline: 'none',
-      fontFamily: 'Inter, sans-serif',
-    },
-    searchIcon: {
-      position: 'absolute',
-      left: '12px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: '#6b7280',
-    },
-    toggleButton: {
-      marginLeft: '8px',
-      backgroundColor: 'transparent',
-      border: 'none',
-      cursor: 'pointer',
-      color: isDarkMode ? '#ffffff' : '#000000',
-    },
-    sectionTitle: {
-      fontSize: '24px',
-      fontWeight: 600,
-      marginBottom: '20px',
-    },
-    cardContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-    },
-    card: {
-      padding: '16px',
-      borderRadius: '12px',
-      backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb',
-      border: `1px solid ${isDarkMode ? '#2d3748' : '#e2e8f0'}`,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      cursor: 'pointer',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-    },
-    cardAvatar: {
-      width: '50px',
-      height: '50px',
-      borderRadius: '50%',
-      backgroundColor: '#3b82f6',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#ffffff',
-      fontSize: '20px',
-      fontWeight: 600,
-    },
-    cardName: {
-      fontSize: '18px',
-      fontWeight: 600,
-    },
-    chatBox: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: 'calc(100vh - 110px)',
-      backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb',
-      borderRadius: '12px',
-      overflow: 'hidden',
-    },
-    chatHeader: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '16px',
-      backgroundColor: '#3b82f6',
-      color: '#ffffff',
-    },
-    chatAvatar: {
-      width: '40px',
-      height: '40px',
-      borderRadius: '50%',
-      backgroundColor: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#3b82f6',
-      fontSize: '18px',
-      fontWeight: 600,
-      marginRight: '12px',
-    },
-    chatName: {
-      fontSize: '18px',
-      fontWeight: 600,
-    },
-    closeButton: {
-      marginLeft: 'auto',
-      background: 'none',
-      border: 'none',
-      color: '#ffffff',
-      cursor: 'pointer',
-      fontSize: '16px',
-    },
-    chatArea: {
-      flex: 1,
-      padding: '16px',
-      overflowY: 'auto',
-    },
-    message: {
-      maxWidth: 'calc(100% - 40px)',
-      padding: '8px 12px',
-      borderRadius: '12px',
-      marginBottom: '8px',
-      wordWrap: 'break-word',
-    },
-    sentMessage: {
-      backgroundColor: '#8b5cf6',
-      color: '#ffffff',
-      alignSelf: 'flex-end',
-      marginLeft: '40px',
-    },
-    receivedMessage: {
-      backgroundColor: isDarkMode ? '#374151' : '#e5e7eb',
-      color: isDarkMode ? '#ffffff' : '#000000',
-      alignSelf: 'flex-start',
-    },
-    inputArea: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '16px',
-      borderTop: '1px solid #e2e8f0',
-    },
-    input: {
-      flex: 1,
-      padding: '8px 12px',
-      fontSize: '16px',
-      border: '1px solid #e2e8f0',
-      borderRadius: '20px',
-      marginRight: '8px',
-      backgroundColor: isDarkMode ? '#2d3748' : '#ffffff',
-      color: isDarkMode ? '#ffffff' : '#000000',
-    },
-    iconButton: {
-      background: 'none',
-      border: 'none',
-      cursor: 'pointer',
-      padding: '8px',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginLeft: '4px',
-    },
-    sendButton: {
-      backgroundColor: '#10B981',
-    },
-    bitcoinButton: {
-      backgroundColor: '#8B5CF6',
-    },
+const contacts = [
+  {
+    id: "1",
+    name: "Tarush Nigam",
+    avatar: "https://imgs.search.brave.com/ZlMA1xyb5O_WINlJ1KTJPjXirJamlkRY4vG4wWqequQ/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvZmVhdHVy/ZWQvY29vbC1wcm9m/aWxlLXBpY3R1cmUt/ODdoNDZnY29iamw1/ZTR4dS5qcGc?height=32&width=32",
+    lastMessage: "I am Frustated ",
+    time: "2m ago",
+    unread: 2,
+  },
+  {
+    id: "2",
+    name: "Adwaita Patane",
+    avatar: "https://imgs.search.brave.com/QzYZ_UfWNkutumqJkDVEip6puzNhmN0zEbKb5gzuwwQ/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvY29v/bC1wcm9maWxlLXBp/Y3R1cmUtNzdqdWZm/YndvaXZzaTFzMy5q/cGc?height=32&width=32",
+    lastMessage: "Backend 2 din me ho jayega",
+    time: "1h ago",
+  },
+  {
+    id: "3",
+    name: "Krushna Tarde",
+    avatar: "https://imgs.search.brave.com/C-3ECNAs8qgaKqabiedl6gDn8ygKX0VuenvBLRUZGLM/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvY29v/bC1wcm9maWxlLXBp/Y3R1cmUtZzNuenhz/OW12cndrdDdldy5q/cGc?height=32&width=32",
+    lastMessage: "Bhai PADHNA HAI  ",
+    time: "2h ago",
+  },
+  {
+    id: "4",
+    name: "Krutika ",
+    avatar: "https://imgs.search.brave.com/ibDrh0svlEQSUGa3puxDTjIrL0JicUs9Zev1B1BUx0Y/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvY29v/bC1wcm9maWxlLXBp/Y3R1cmVzLWZhY2Vs/ZXNzLXdoaXRlLW1h/bi1sbmU5em1ocWxj/aGxjcGM3LmpwZw?height=32&width=32",
+    lastMessage: " GO RANGA!!!!",
+    time: "1d ago",
   }
+];
 
-  const handlePersonClick = (person) => {
-    setIsFading(true)
-    setTimeout(() => {
-      setSelectedPerson(person)
-      setIsFading(false)
-    }, 300)
-  }
 
-  const handleCloseChat = () => {
-    setIsFading(true)
-    setTimeout(() => {
-      setSelectedPerson(null)
-      setMessages([])
-      setIsFading(false)
-    }, 300)
-  }
+const socket = io('http://localhost:3000'); // Connect to the WebSocket server
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      setMessages([...messages, { text: inputMessage, sent: true }])
-      setInputMessage('')
-    
-      // Simulate a received message after a short delay
-      setTimeout(() => {
-        setMessages(prevMessages => [...prevMessages, { text: 'This is a reply', sent: false }])
-      }, 1000)
-    }
-  }
-
-  const handleBitcoinClick = () => {
-    // Placeholder for Bitcoin-related functionality
-    console.log('Bitcoin button clicked')
-  }
+export default function MessagesPage() {
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredContacts, setFilteredContacts] = useState(contacts);
+  const messagesContainerRef = useRef(null); // Ref for messages container
 
   useEffect(() => {
-    if (chatAreaRef.current) {
-      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
-  }, [messages])
+  }, [darkMode]);
+
+  useEffect(() => {
+    setFilteredContacts(
+      contacts.filter(contact =>
+        contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery]);
+
+  useEffect(() => {
+    // Listen for incoming messages from the server
+    socket.on('chat message', (msg) => {
+      const replyMessage = {
+        id: Date.now().toString(),
+        senderId: msg.senderId,
+        text: msg.text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      // Update messages for the selected contact with the incoming message
+      setMessages(prevMessages => ({
+        ...prevMessages,
+        [msg.contactId]: [...(prevMessages[msg.contactId] || []), replyMessage]
+      }));
+
+      if (selectedContact?.id === msg.contactId) {
+        scrollToBottom(); // Scroll to the bottom if the contact is selected
+      }
+    });
+
+    // Clean up the socket connection on component unmount
+    return () => {
+      socket.off('chat message');
+    };
+  }, [selectedContact]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  const sendMessage = () => {
+    if (message.trim() !== "" && selectedContact) {
+      const newMessage = {
+        id: Date.now().toString(),
+        senderId: 'currentUser',
+        text: message,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      // Update messages for the selected contact
+      setMessages(prevMessages => ({
+        ...prevMessages,
+        [selectedContact.id]: [...(prevMessages[selectedContact.id] || []), newMessage]
+      }));
+
+      // Emit the message to the WebSocket server
+      socket.emit('chat message', { text: message, contactId: selectedContact.id, senderId: 'currentUser' });
+
+      setMessage("");
+      scrollToBottom(); // Scroll to the bottom after sending a message
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight - 10;
+    }
+  };
 
   return (
-    <>
-      <style>
-        {`
-          html, body {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            height: 100%;
-            width: 100%;
-          }
-        `}
-      </style>
-      <div style={styles.container}>
-        <aside style={styles.sidebar}>
-          <div style={styles.sidebarLogo}>
-            <div style={styles.logoIcon}>V</div>
-            <span>Vyuha</span>
-          </div>
+    <div className="app">
+      {/* Particles Background */}
+      <ParticlesCanvas />
 
-          <button 
-            style={styles.addButton}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#2044b4'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#343840'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
-          >
-            + Add New
+      {/* Navigation Bar */}
+      <nav className={`navbar ${darkMode ? 'opacity-70' : 'opacity-100'}`}>
+        <div className="nav-left">
+          <Mail className="h-6 w-6 text-purple-600" />
+          <span className="app-title">{darkMode ? "VYU:" : "VYU:"}</span>
+        </div>
+        <div className="flex items-center space-x-20">
+          <button className="text-gray-600 hover:text-gray-800">H O M E</button>
+          <button className="text-gray-600 hover:text-gray-800">C O N N E C T</button>
+          <button className="text-gray-600 hover:text-gray-800">C O N T A C T S</button>
+        </div>
+
+        <div className="nav-right">
+          <button onClick={toggleDarkMode}>
+            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
+          <div className="avatar">
+            <img src="https://imgs.search.brave.com/ofPeJBl9o2_cLktaum8ZtMsdZh8mYw6HZBz5MQs0AL8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9nb29k/aWVzLmljb25zOC5j/b20vd2ViL2NvbW1v/bi9hdXRvY29tcGxl/dGUvZG9tYWlucy9w/aG90b3Muc3Zn" alt="User Avatar" />
+          </div>
+        </div>
+      </nav>
 
-          <nav style={styles.navSection}>
-            <div style={styles.navLabel}>PAGES</div>
-            {[
-              { icon: Home, label: 'Home' },
-              { icon: FileText, label: 'Contract' },
-              { icon: Link, label: 'Connect' },
-              { icon: User, label: 'Profile' },
-              { icon: MessageCircle, label: 'Chat' },
-              { icon: Settings, label: 'Settings' },
-            ].map((item) => (
-              <button
-                key={item.label}
-                style={{
-                  ...styles.navButton,
-                  backgroundColor: item.label === 'Chat' ? '#3b82f6' : 'transparent',
-                }}
-                onMouseEnter={(e) => {
-                  if (item.label !== 'Chat') {
-                    e.currentTarget.style.backgroundColor = '#2044b4'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (item.label !== 'Chat') {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }
-                }}
+      <div className="main-content">
+        {/* Sidebar */}
+        <div className={`sidebar ${darkMode ? 'opacity-70' : 'opacity-100'}`}>
+          <div className="sidebar-header">
+            <h2 className="text-xl font-semibold text-purple-600">Messages</h2>
+            <button className="p-2">
+              <Settings className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="search-container">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search messages"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="contacts-list">
+            {filteredContacts.map((contact) => (
+              <div
+                key={contact.id}
+                onClick={() => setSelectedContact(contact)}
+                className={`contact-item ${selectedContact?.id === contact.id ? "active" : ""}`}
               >
-                <item.icon size={20} />
-                {item.label}
-              </button>
+                <div className="contact-avatar">
+                  <img src={contact.avatar} alt={contact.name} />
+                </div>
+                <div className="contact-info">
+                  <span className="contact-name">{contact.name}</span>
+                  <span className="contact-last-message">{contact.lastMessage}</span>
+                </div>
+                {contact.unread && (
+                  <span className="unread-badge">{contact.unread}</span>
+                )}
+              </div>
             ))}
-          </nav>
-        </aside>
+          </div>
+        </div>
 
-        <main style={{...styles.main, opacity: isFading ? 0 : 1}}>
-          {selectedPerson ? (
-            <div style={styles.chatBox}>
-              <div style={styles.chatHeader}>
-                <div style={styles.chatAvatar}>{selectedPerson.name.charAt(0)}</div>
-                <div style={styles.chatName}>{selectedPerson.name}</div>
-                <button style={styles.closeButton} onClick={handleCloseChat}>
-                  ×
-                </button>
-              </div>
-              <div style={styles.chatArea} ref={chatAreaRef}>
-                {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      ...styles.message,
-                      ...(message.sent ? styles.sentMessage : styles.receivedMessage),
-                    }}
-                  >
-                    {message.text}
-                  </div>
-                ))}
-              </div>
-              <div style={styles.inputArea}>
-                <input
-                  style={styles.input}
-                  type="text"
-                  placeholder="Type a message..."
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSendMessage()
-                    }
-                  }}
-                />
-                <button 
-                  style={{...styles.iconButton, ...styles.sendButton}} 
-                  onClick={handleSendMessage}
-                >
-                  <Send size={20} color="#ffffff" />
-                </button>
-                <button 
-                  style={{...styles.iconButton, ...styles.bitcoinButton}} 
-                  onClick={handleBitcoinClick}
-                >
-                  <Bitcoin size={20} color="#ffffff" />
-                </button>
-              </div>
-            </div>
-          ) : (
+        {/* Main Chat Area */}
+        <div className="chat-area">
+          {selectedContact ? (
             <>
-              <div style={styles.searchContainer}>
-                <Search size={20} style={styles.searchIcon} />
-                <input
-                  type="text"
-                  placeholder="Search people..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={styles.searchInput}
-                />
-                <button 
-                  style={styles.toggleButton}
-                  onClick={() => setIsDarkMode(!isDarkMode)}
-                >
-                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                </button>
+              <div className="chat-header">
+                <div className="contact-avatar">
+                  <img src={selectedContact.avatar} alt={selectedContact.name} />
+                </div>
+                <div>
+                  <h3 className="contact-name">{selectedContact.name}</h3>
+                  <p className="text-sm text-muted-foreground">Active now</p>
+                </div>
               </div>
-
-              <h2 style={styles.sectionTitle}>Message Center</h2>
-              <div style={styles.cardContainer}>
-                {people.filter(person => person.name.toLowerCase().includes(searchQuery.toLowerCase())).map(person => (
-                  <div
-                    key={person.id}
-                    style={styles.card}
-                    onClick={() => handlePersonClick(person)}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.02)'
-                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)'
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }}
+              <div className="messages-container" ref={messagesContainerRef}>
+                {(messages[selectedContact.id] || []).map((msg) => (
+                  <div 
+                    key={msg.id} 
+                    className={`message ${msg.senderId === 'currentUser' ? 'sent' : 'received'}`}
                   >
-                    <div style={styles.cardAvatar}>{person.name.charAt(0)}</div>
-                    <div style={styles.cardName}>{person.name}</div>
+                    <p>{msg.text}</p>
+                    <span className="message-timestamp">{msg.timestamp}</span>
                   </div>
                 ))}
+              </div>
+              <div className="message-input-container">
+                <input
+                  type="text"
+                  placeholder="Type a message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                />
+                <button onClick={sendMessage}>
+                  <Send className="send-button" size={20} color="white" />
+                </button>
+                <button  onClick={sendMessage}>
+                  <Bitcoin className= "bitcoin-button" size={20} />
+                </button>
               </div>
             </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+              <Mail className="h-12 w-12 mb-4" />
+              <p className="text-center">Select a conversation to start messaging</p>
+            </div>
           )}
-        </main>
+        </div>
       </div>
-    </>
-  )
+    </div>
+  );
 }
-
