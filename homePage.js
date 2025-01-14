@@ -169,7 +169,7 @@ export default function Dashboard() {
       cursor: 'pointer',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      border: 2px solid ${isDark ? '#2d3748' : '#e2e8f0'},
+      border: `2px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
       color: isDark ? '#ffffff' : '#ffffff',
     },
     profileInfo: {
@@ -203,7 +203,7 @@ export default function Dashboard() {
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
       borderRadius: '12px',
       padding: '24px',
-      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
+      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
       transition: 'transform 0.2s, box-shadow 0.2s',
     },
     infoItem: {
@@ -217,7 +217,7 @@ export default function Dashboard() {
       transition: 'all 0.2s',
       cursor: 'pointer',
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
-      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
+      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
     },
     rating: {
       display: 'flex',
@@ -239,7 +239,7 @@ export default function Dashboard() {
       flexDirection: 'row',
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
       borderRadius: '12px',
-      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
+      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
       overflow: 'hidden',
       transition: 'transform 0.2s, box-shadow 0.2s',
     },
@@ -257,7 +257,7 @@ export default function Dashboard() {
     card: {
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
       borderRadius: '12px',
-      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
+      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
       overflow: 'hidden',
       marginBottom: '24px',
       transition: 'transform 0.2s, box-shadow 0.2s',
@@ -282,7 +282,7 @@ export default function Dashboard() {
     },
     tabsList: {
       display: 'flex',
-      borderBottom: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
+      borderBottom: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
       marginBottom: '20px',
       marginLeft: '280px',
     },
@@ -522,7 +522,7 @@ export default function Dashboard() {
                 } else if (item.label === 'Connect') {
                   navigate('/connect'); // Navigate to /connect
                 } else {
-                  navigate(/${item.label.toLowerCase()}); // Default navigation for other labels
+                  navigate(`/${item.label.toLowerCase()}`); // Default navigation for other labels
                 }
               }}
             >
@@ -549,7 +549,7 @@ export default function Dashboard() {
               <div 
                 style={{
                   ...styles.avatar,
-                  ...(profileImage ? { backgroundImage: url(${profileImage}) } : {}),
+                  ...(profileImage ? { backgroundImage: `url(${profileImage})` } : {}),
                 }}
                 onClick={handleProfileImageClick}
               >
@@ -568,7 +568,7 @@ export default function Dashboard() {
                   <Info size={16} />
                   <span>Passionate musician and tech enthusiast</span>
                 </div>
-                <div style={{...styles.profileDetail,color: ${isDark ? '#ffffff' : '#000000'}}}>
+                <div style={{...styles.profileDetail,color: `${isDark ? '#ffffff' : '#000000'}`}}>
                   <Users size={16} />
                   <span onClick={() => setIsConnectionsOpen(true)} style={{ cursor: 'pointer' }}>Connections: 299</span>
                 </div> 
@@ -837,3 +837,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
