@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Mail, MapPin, Phone, Star, MessageCircle, Settings, Activity, Info, Home, FileText, Link, User, FilePlus, Moon, Briefcase, Sun, Users, X, MoreHorizontal } from 'lucide-react';
+import { Mail, MapPin, Phone, Star, MessageCircle, Settings, Activity, Info, Home, FileText, Link, User, FilePlus, Moon, Briefcase, Sun, Users, X, MoreHorizontal, Inbox } from 'lucide-react';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom'; 
-import JobApplicantsList from './job application'; // Import the JobApplicantsList component
+import JobApplicantsList from './job application';
+import { motion } from 'framer-motion';
+import { MessageBox } from './Message box profile page'; // Update this import
+
 
 export default function Dashboard() {
   const [isDark, setIsDark] = useState(false);
@@ -17,6 +20,7 @@ export default function Dashboard() {
   const [showRequestButton, setShowRequestButton] = useState({}); // State to track visibility of request buttons
   const [isApplicantsListOpen, setIsApplicantsListOpen] = useState(false); // State for job applicants list
   const [applicants, setApplicants] = useState([]); // State for applicants data
+  const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false); // New state for message box
 
   // Sample applicants data
   const sampleApplicants = [
@@ -165,7 +169,7 @@ export default function Dashboard() {
       cursor: 'pointer',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      border: `2px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
+      border: 2px solid ${isDark ? '#2d3748' : '#e2e8f0'},
       color: isDark ? '#ffffff' : '#ffffff',
     },
     profileInfo: {
@@ -199,7 +203,7 @@ export default function Dashboard() {
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
       borderRadius: '12px',
       padding: '24px',
-      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
+      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
       transition: 'transform 0.2s, box-shadow 0.2s',
     },
     infoItem: {
@@ -213,7 +217,7 @@ export default function Dashboard() {
       transition: 'all 0.2s',
       cursor: 'pointer',
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
-      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
+      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
     },
     rating: {
       display: 'flex',
@@ -235,7 +239,7 @@ export default function Dashboard() {
       flexDirection: 'row',
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
       borderRadius: '12px',
-      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
+      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
       overflow: 'hidden',
       transition: 'transform 0.2s, box-shadow 0.2s',
     },
@@ -253,7 +257,7 @@ export default function Dashboard() {
     card: {
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
       borderRadius: '12px',
-      border: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
+      border: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
       overflow: 'hidden',
       marginBottom: '24px',
       transition: 'transform 0.2s, box-shadow 0.2s',
@@ -278,7 +282,7 @@ export default function Dashboard() {
     },
     tabsList: {
       display: 'flex',
-      borderBottom: `1px solid ${isDark ? '#2d3748' : '#e2e8f0'}`,
+      borderBottom: 1px solid ${isDark ? '#2d3748' : '#e2e8f0'},
       marginBottom: '20px',
       marginLeft: '280px',
     },
@@ -305,7 +309,7 @@ export default function Dashboard() {
     },
     circularButtonContainer: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)', // Adjusted to 4 columns for 4 buttons
+      gridTemplateColumns: 'repeat(5, 1fr)', // Adjusted to 5 columns for 5 buttons
       gap: '25px',
       marginTop: '30px',
       marginRight: '100px',
@@ -410,6 +414,12 @@ export default function Dashboard() {
     },
   };
 
+  const skills = [
+    "JavaScript", "React", "Node.js", "Python", "TypeScript", "GraphQL", 
+    "Docker", "AWS", "MongoDB", "SQL", "Git", "CI/CD", "Agile", "TDD",
+    "UI/UX Design", "RESTful APIs", "Microservices", "Kubernetes", "Machine Learning"
+  ];
+
   const [userData,  setUserData] = useState({
     fullName: "",
     email: "",
@@ -494,12 +504,14 @@ export default function Dashboard() {
               }}
               onMouseEnter={(e) => {
                 if (item.label !== 'Home') {
-                  e.currentTarget.style.backgroundColor = '8804fc'
+                  e.currentTarget.style.backgroundColor = '#E6E6FA';
+                  e.currentTarget.style.color = '#8804fc';
                 }
               }}
               onMouseLeave={(e) => {
                 if (item.label !== 'Home') {
-                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#ffffff';
                 }
               }}
               onClick={() => {
@@ -510,7 +522,7 @@ export default function Dashboard() {
                 } else if (item.label === 'Connect') {
                   navigate('/connect'); // Navigate to /connect
                 } else {
-                  navigate(`/${item.label.toLowerCase()}`); // Default navigation for other labels
+                  navigate(/${item.label.toLowerCase()}); // Default navigation for other labels
                 }
               }}
             >
@@ -537,7 +549,7 @@ export default function Dashboard() {
               <div 
                 style={{
                   ...styles.avatar,
-                  ...(profileImage ? { backgroundImage: `url(${profileImage})` } : {}),
+                  ...(profileImage ? { backgroundImage: url(${profileImage}) } : {}),
                 }}
                 onClick={handleProfileImageClick}
               >
@@ -556,7 +568,7 @@ export default function Dashboard() {
                   <Info size={16} />
                   <span>Passionate musician and tech enthusiast</span>
                 </div>
-                <div style={{...styles.profileDetail,color: `${isDark ? '#ffffff' : '#000000'}`}}>
+                <div style={{...styles.profileDetail,color: ${isDark ? '#ffffff' : '#000000'}}}>
                   <Users size={16} />
                   <span onClick={() => setIsConnectionsOpen(true)} style={{ cursor: 'pointer' }}>Connections: 299</span>
                 </div> 
@@ -610,6 +622,20 @@ export default function Dashboard() {
               </button>
               <button 
                 style={styles.circularButton} 
+                onClick={() => setIsMessageBoxOpen(true)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <Inbox size={20} />
+              </button>
+              <button 
+                style={styles.circularButton} 
                 onClick={() => setIsApplicantsListOpen(true)} // Open the applicants list
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'scale(1.1)'; // Scale up on hover
@@ -622,6 +648,35 @@ export default function Dashboard() {
               >
                 <Briefcase size={20} />
               </button>
+            </div>
+            <MessageBox isOpen={isMessageBoxOpen} onClose={() => setIsMessageBoxOpen(false)} /> {/* MessageBox component */}
+            <div className="mt-8 flex flex-col gap-4">
+              {/* First row of skills */}
+              <div className="flex flex-wrap gap-3">
+                {skills.slice(0, 7).map((skill) => (
+                  <motion.div
+                    key={skill}
+                    className="bg-[#E6E6FA] px-4 py-2 rounded-full text-sm font-medium text-gray-700"
+                    whileHover={{ y: -2, boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    
+                  </motion.div>
+                ))}
+              </div>
+              {/* Second row of skills */}
+              <div className="flex flex-wrap gap-3">
+                {skills.slice(7, 14).map((skill) => (
+                  <motion.div
+                    key={skill}
+                    className="bg-[#E6E6FA] px-4 py-2 rounded-full text-sm font-medium text-gray-700"
+                    whileHover={{ y: -2, boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                   
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
